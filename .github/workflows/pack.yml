@@ -38,7 +38,7 @@ jobs:
             java -cp minemoji.jar com.github.cinnamondev.minemoji.PackMaker.PackMaker 
             --input-directory ./assets/
             --output-directory ./site/${PACK_NAME}
-            --prefix 
+            --prefix e
             --pack-url $(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.html_url')${PACK_NAME}.zip
             --zip-pack
             --width 32
