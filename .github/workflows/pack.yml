@@ -31,46 +31,6 @@ jobs:
           with:
             distribution: 'temurin'
             java-version: '21'
-        - name: Install ImageMagick
-          run: sudo apt-get update && sudo apt-get install -y imagemagick
-        - name: Remove invalid images
-          run: |
-            echo "Validating and removing invalid images..."
-            for file in ./assets/*; do
-              if [ -f "$file" ]; then
-                if [[ "$file" =~ \.(png|gif|jpg|jpeg)$ ]]; then
-                  echo "Checking: $file"
-                  
-                  # For GIFs, get dimensions of the first frame
-                  if [[ "$file" =~ \.gif$ ]]; then
-                    dims=$(identify -format "%wx%h" "$file[0]" 2>/dev/null | head -1)
-                  else
-                    dims=$(identify -format "%wx%h" "$file" 2>/dev/null | head -1)
-                  fi
-                  
-                  if [ $? -eq 0 ] && [ -n "$dims" ]; then
-                    width=$(echo "$dims" | cut -d'x' -f1)
-                    height=$(echo "$dims" | cut -d'x' -f2)
-                    
-                    echo "  Dimensions: ${width}x${height}"
-                    
-                    if ! [[ "$width" =~ ^[0-9]+$ ]] || ! [[ "$height" =~ ^[0-9]+$ ]]; then
-                      echo "  ❌ Invalid dimension format, removing: $file"
-                      rm "$file"
-                    elif [ "$width" -le 0 ] || [ "$height" -le 0 ]; then
-                      echo "  ❌ Invalid dimensions (${width}x${height}), removing: $file"
-                      rm "$file"
-                    else
-                      echo "  ✓ Valid"
-                    fi
-                  else
-                    echo "  ❌ Cannot read file, removing: $file"
-                    rm "$file"
-                  fi
-                fi
-              fi
-            done
-          continue-on-error: false
         - name: Generate Pack
           env: 
             GH_TOKEN: ${{ github.token }}
