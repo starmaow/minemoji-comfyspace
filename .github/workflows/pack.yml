@@ -23,7 +23,7 @@ jobs:
           uses: robinraju/release-downloader@v1
           with:
             latest: true
-            repository: 'starmaow/minemoji-comfy'
+            repository: 'cinnamondev/minemoji'
             fileName: 'minemoji.jar'
             tarBall: false
             zipBall: false
@@ -35,7 +35,7 @@ jobs:
           env: 
             GH_TOKEN: ${{ github.token }}
           run: >
-            java -cp minemoji.jar com.github.starmaow.minemoji-comfy.PackMaker.PackMaker 
+            java -cp minemoji.jar com.github.cinnamondev.minemoji.PackMaker.PackMaker 
             --input-directory ./assets/
             --output-directory ./site/${PACK_NAME}
             --prefix ${PACK_NAME}
