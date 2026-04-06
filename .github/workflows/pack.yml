@@ -41,6 +41,7 @@ jobs:
             --prefix ${PACK_NAME}
             --pack-url $(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.html_url')${PACK_NAME}.zip
             --zip-pack
+            --width 32
         - name: serve example json
           run: cp ./site/${PACK_NAME}/${PACK_NAME}.json ./site/${PACK_NAME}.json
         - name: Setup Pages
