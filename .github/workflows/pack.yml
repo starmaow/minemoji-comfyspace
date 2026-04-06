@@ -38,12 +38,15 @@ jobs:
             echo "Validating and removing invalid images..."
             for file in ./assets/*; do
               if [ -f "$file" ]; then
-                # Check if it's an image file
                 if [[ "$file" =~ \.(png|gif|jpg|jpeg)$ ]]; then
                   echo "Checking: $file"
                   
-                  # Get dimensions safely
-                  dims=$(identify -format "%wx%h" "$file" 2>/dev/null)
+                  # For GIFs, get dimensions of the first frame
+                  if [[ "$file" =~ \.gif$ ]]; then
+                    dims=$(identify -format "%wx%h" "$file[0]" 2>/dev/null | head -1)
+                  else
+                    dims=$(identify -format "%wx%h" "$file" 2>/dev/null | head -1)
+                  fi
                   
                   if [ $? -eq 0 ] && [ -n "$dims" ]; then
                     width=$(echo "$dims" | cut -d'x' -f1)
@@ -51,7 +54,6 @@ jobs:
                     
                     echo "  Dimensions: ${width}x${height}"
                     
-                    # Check if dimensions are valid numbers
                     if ! [[ "$width" =~ ^[0-9]+$ ]] || ! [[ "$height" =~ ^[0-9]+$ ]]; then
                       echo "  ❌ Invalid dimension format, removing: $file"
                       rm "$file"
