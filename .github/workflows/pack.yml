@@ -34,17 +34,33 @@ jobs:
         - name: Remove invalid images
           run: |
             echo "Validating and removing invalid images..."
-            for file in ./assets/*.{png,gif,jpg,jpeg}; do
+            for file in ./assets/*; do
               if [ -f "$file" ]; then
-                dimensions=$(identify "$file" 2>/dev/null | head -1)
-                if [ $? -ne 0 ]; then
-                  echo "Removing corrupted file: $file"
-                  rm "$file"
-                else
-                  width=$(echo "$dimensions" | grep -oP '\d+x\d+' | cut -d'x' -f1)
-                  height=$(echo "$dimensions" | grep -oP '\d+x\d+' | cut -d'x' -f2)
-                  if [ "$width" -le 0 ] || [ "$height" -le 0 ]; then
-                    echo "Removing invalid dimensions ($width x $height): $file"
+                # Check if it's an image file
+                if [[ "$file" =~ \.(png|gif|jpg|jpeg)$ ]]; then
+                  echo "Checking: $file"
+                  
+                  # Get dimensions safely
+                  dims=$(identify -format "%wx%h" "$file" 2>/dev/null)
+                  
+                  if [ $? -eq 0 ] && [ -n "$dims" ]; then
+                    width=$(echo "$dims" | cut -d'x' -f1)
+                    height=$(echo "$dims" | cut -d'x' -f2)
+                    
+                    echo "  Dimensions: ${width}x${height}"
+                    
+                    # Check if dimensions are valid numbers
+                    if ! [[ "$width" =~ ^[0-9]+$ ]] || ! [[ "$height" =~ ^[0-9]+$ ]]; then
+                      echo "  ❌ Invalid dimension format, removing: $file"
+                      rm "$file"
+                    elif [ "$width" -le 0 ] || [ "$height" -le 0 ]; then
+                      echo "  ❌ Invalid dimensions (${width}x${height}), removing: $file"
+                      rm "$file"
+                    else
+                      echo "  ✓ Valid"
+                    fi
+                  else
+                    echo "  ❌ Cannot read file, removing: $file"
                     rm "$file"
                   fi
                 fi
